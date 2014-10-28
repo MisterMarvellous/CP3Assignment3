@@ -1,5 +1,3 @@
-package flinders.mandelbrot;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;

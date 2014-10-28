@@ -1,5 +1,3 @@
-package flinders.mandelbrot;
-
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

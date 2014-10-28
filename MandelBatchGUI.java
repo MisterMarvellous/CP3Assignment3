@@ -1,5 +1,3 @@
-package flinders.mandelbrot;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +55,8 @@ public class MandelBatchGUI extends javax.swing.JFrame {
         guiSettingList = new javax.swing.JList<MandelSetting>();
         guiSaveAllButton = new javax.swing.JButton();
         guiRemoveSettingButton = new javax.swing.JButton();
-        guiImageDisplayPanel = new flinders.mandelbrot.ImagePanel();
+        guiImageDisplayPanel = new ImagePanel();
+	guiProcessBarPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("MandelBatch");
@@ -376,12 +375,14 @@ public class MandelBatchGUI extends javax.swing.JFrame {
         guiImageDisplayPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         guiImageDisplayPanel.setFocusable(false);
 
+	
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+		.addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(guiSettingListPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -391,7 +392,8 @@ public class MandelBatchGUI extends javax.swing.JFrame {
                         .addComponent(guiParametersPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(guiRenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+		.addContainerGap()
+		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -404,199 +406,200 @@ public class MandelBatchGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(guiParametersPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(guiRenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addContainerGap()
+		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void guiNewSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiNewSettingButtonActionPerformed
-    mandelParameterList.createSetting();
-    guiSettingList.setSelectedIndex(mandelParameterList.getCurrentIndex());
-    guiRenderButton.setEnabled(true);
-    guiComputeModeCombo.setEnabled(true);
-}//GEN-LAST:event_guiNewSettingButtonActionPerformed
-
-private void guiRenderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRenderButtonActionPerformed
-    long startTime = System.currentTimeMillis();
-    for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
-        mandelProcessor.compute(o, computeMode);
-        o.setImage(mandelProcessor.getLastImage());
-        long betweenTime = System.currentTimeMillis();
-        guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
-    }
-    long endTime = System.currentTimeMillis();
-    guiTimeElapsedField.setText(getElapsedTimeString(endTime-startTime));
-    refreshImage();
-}//GEN-LAST:event_guiRenderButtonActionPerformed
-
-private void guiRemoveSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRemoveSettingButtonActionPerformed
-    int removed = 0;
-    for (int i : guiSettingList.getSelectedIndices()) {
-        mandelParameterList.selectSetting(i-removed++);
-        mandelParameterList.removeCurrentSetting();
-    }
-    guiSettingList.setSelectedIndex(mandelParameterList.getCurrentIndex());
-    if (mandelParameterList.getSize() == 0) {
-        guiRenderButton.setEnabled(false);
-        guiComputeModeCombo.setEnabled(false);
-    }
-}//GEN-LAST:event_guiRemoveSettingButtonActionPerformed
-
-private void guiSettingListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_guiSettingListValueChanged
-    MandelSetting setting = mandelParameterList.getCurrentSetting();
-    if (setting != null) {
-        setting.setName(guiNameField.getText());
-        setting.setMaxIterations(Integer.parseInt(guiMaxIterField.getText()));
-        setting.setMinReal(Double.parseDouble(guiMinRealField.getText()));
-        setting.setMaxReal(Double.parseDouble(guiMaxRealField.getText()));
-        setting.setMinImaginary(Double.parseDouble(guiMinImagField.getText()));
-        setting.setMaxImaginary(Double.parseDouble(guiMaxImagField.getText()));
-        setting.setWidth(Integer.parseInt(guiWidthField.getText()));
-        setting.setHeight(Integer.parseInt(guiHeightField.getText()));
-        mandelParameterList.notifyContentChanged();
+    private void guiNewSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiNewSettingButtonActionPerformed
+	mandelParameterList.createSetting();
+	guiSettingList.setSelectedIndex(mandelParameterList.getCurrentIndex());
+	guiRenderButton.setEnabled(true);
+	guiComputeModeCombo.setEnabled(true);
+    }//GEN-LAST:event_guiNewSettingButtonActionPerformed
+    
+    private void guiRenderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRenderButtonActionPerformed
+	long startTime = System.currentTimeMillis();
+	for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
+	    mandelProcessor.compute(o, computeMode);
+	    o.setImage(mandelProcessor.getLastImage());
+	    long betweenTime = System.currentTimeMillis();
+	    guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
+	}
+	long endTime = System.currentTimeMillis();
+	guiTimeElapsedField.setText(getElapsedTimeString(endTime-startTime));
+	refreshImage();
+    }//GEN-LAST:event_guiRenderButtonActionPerformed
+    
+    private void guiRemoveSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRemoveSettingButtonActionPerformed
+	int removed = 0;
+	for (int i : guiSettingList.getSelectedIndices()) {
+	    mandelParameterList.selectSetting(i-removed++);
+	    mandelParameterList.removeCurrentSetting();
+	}
+	guiSettingList.setSelectedIndex(mandelParameterList.getCurrentIndex());
+	if (mandelParameterList.getSize() == 0) {
+	    guiRenderButton.setEnabled(false);
+	    guiComputeModeCombo.setEnabled(false);
+	}
+    }//GEN-LAST:event_guiRemoveSettingButtonActionPerformed
+    
+    private void guiSettingListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_guiSettingListValueChanged
+	MandelSetting setting = mandelParameterList.getCurrentSetting();
+	if (setting != null) {
+	    setting.setName(guiNameField.getText());
+	    setting.setMaxIterations(Integer.parseInt(guiMaxIterField.getText()));
+	    setting.setMinReal(Double.parseDouble(guiMinRealField.getText()));
+	    setting.setMaxReal(Double.parseDouble(guiMaxRealField.getText()));
+	    setting.setMinImaginary(Double.parseDouble(guiMinImagField.getText()));
+	    setting.setMaxImaginary(Double.parseDouble(guiMaxImagField.getText()));
+	    setting.setWidth(Integer.parseInt(guiWidthField.getText()));
+	    setting.setHeight(Integer.parseInt(guiHeightField.getText()));
+	    mandelParameterList.notifyContentChanged();
+	}
+	
+	if (!evt.getValueIsAdjusting() && !guiSettingList.isSelectionEmpty()) {
+	    if (guiSettingList.isSelectedIndex(evt.getFirstIndex())) {
+		if (evt.getFirstIndex() == mandelParameterList.getCurrentIndex()) {
+		    if (guiSettingList.isSelectedIndex(evt.getLastIndex())) {
+			mandelParameterList.selectSetting(evt.getLastIndex());
+		    }
+		} else {
+		    mandelParameterList.selectSetting(evt.getFirstIndex());
+		}
+	    } else if (guiSettingList.isSelectedIndex(evt.getLastIndex())) {
+		mandelParameterList.selectSetting(evt.getLastIndex());
+	    } else {
+		mandelParameterList.selectSetting(guiSettingList.getMinSelectionIndex());
+	    } 
+	}
+	
+    }//GEN-LAST:event_guiSettingListValueChanged
+    
+    private void guiNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiNameFieldFocusLost
+	mandelParameterList.getCurrentSetting().setName(guiNameField.getText());
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiNameFieldFocusLost
+    
+    private void guiMaxIterFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxIterFieldFocusLost
+	mandelParameterList.getCurrentSetting().setMaxIterations(Integer.parseInt(guiMaxIterField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiMaxIterFieldFocusLost
+    
+    private void guiMinRealFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMinRealFieldFocusLost
+	mandelParameterList.getCurrentSetting().setMinReal(Double.parseDouble(guiMinRealField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiMinRealFieldFocusLost
+    
+    private void guiMaxRealFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxRealFieldFocusLost
+	mandelParameterList.getCurrentSetting().setMaxReal(Double.parseDouble(guiMaxRealField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiMaxRealFieldFocusLost
+    
+    private void guiMinImagFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMinImagFieldFocusLost
+	mandelParameterList.getCurrentSetting().setMinImaginary(Double.parseDouble(guiMinImagField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiMinImagFieldFocusLost
+    
+    private void guiMaxImagFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxImagFieldFocusLost
+	mandelParameterList.getCurrentSetting().setMaxImaginary(Double.parseDouble(guiMaxImagField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiMaxImagFieldFocusLost
+    
+    private void guiWidthFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiWidthFieldFocusLost
+	mandelParameterList.getCurrentSetting().setWidth(Integer.parseInt(guiWidthField.getText()));
+	mandelParameterList.notifyContentChanged();
+	
+    }//GEN-LAST:event_guiWidthFieldFocusLost
+    
+    private void guiHeightFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiHeightFieldFocusLost
+	mandelParameterList.getCurrentSetting().setHeight(Integer.parseInt(guiHeightField.getText()));
+	mandelParameterList.notifyContentChanged();
+    }//GEN-LAST:event_guiHeightFieldFocusLost
+    
+    private void guiSaveAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiSaveAllButtonActionPerformed
+	JFileChooser fc = new JFileChooser();
+	fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	int returnVal = fc.showOpenDialog(this);
+	if (returnVal == JFileChooser.APPROVE_OPTION) {
+	    File dir = fc.getSelectedFile();
+	    for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
+		BufferedImage img = o.getImage();
+		if (img != null) {
+		    File file = new File(dir, o.getName() + ".png");
+		    for (int i = 1; file.exists(); i++) {
+			file = new File(dir, o.getName() + "_" + i + ".png");
+		    }
+		    try {
+			ImageIO.write(img, "jpg", file);
+			System.out.println("Saved image to file " + file.getName());
+		    } catch (IOException e) {
+			JOptionPane.showMessageDialog(this, "Error writing out file: " + file.getName());
+			break;
+		    }
+		}
+	    }
+	}
+    }//GEN-LAST:event_guiSaveAllButtonActionPerformed
+    
+    private void guiComputeModeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiComputeModeComboActionPerformed
+	computeMode = MandelProcessor.ComputeMode.class.getEnumConstants()[guiComputeModeCombo.getSelectedIndex()];
+    }//GEN-LAST:event_guiComputeModeComboActionPerformed
+    
+    public String getElapsedTimeString(long elapsedTime) {        
+	String format = String.format("%%0%dd", 2);    
+	String millisecs = String.format(format, elapsedTime % 1000);
+	elapsedTime /= 1000;
+	String seconds = String.format(format, elapsedTime % 60);  
+	String minutes = String.format(format, (elapsedTime % 3600) / 60);  
+	String hours = String.format(format, elapsedTime / 3600);  
+	String time =  hours + ":" + minutes + ":" + seconds + ":" + millisecs;  
+	return time;  
+    }  
+    
+    public void initFromState() {
+	if (mandelParameterList.selectSetting(0)) {
+	    guiSettingList.setSelectedIndex(0);
+	    guiRenderButton.setEnabled(true);
+	    guiComputeModeCombo.setEnabled(true);
+	}
     }
     
-    if (!evt.getValueIsAdjusting() && !guiSettingList.isSelectionEmpty()) {
-        if (guiSettingList.isSelectedIndex(evt.getFirstIndex())) {
-            if (evt.getFirstIndex() == mandelParameterList.getCurrentIndex()) {
-                if (guiSettingList.isSelectedIndex(evt.getLastIndex())) {
-                    mandelParameterList.selectSetting(evt.getLastIndex());
-                }
-            } else {
-                mandelParameterList.selectSetting(evt.getFirstIndex());
-            }
-        } else if (guiSettingList.isSelectedIndex(evt.getLastIndex())) {
-            mandelParameterList.selectSetting(evt.getLastIndex());
-        } else {
-            mandelParameterList.selectSetting(guiSettingList.getMinSelectionIndex());
-        } 
+    public void refreshImage() {
+	if (mandelParameterList.getCurrentSetting() != null) {
+	    guiImageDisplayPanel.setImage(mandelParameterList.getCurrentSetting().getImage());
+	} else {
+	    guiImageDisplayPanel.setImage(null);
+	}
+	guiImageDisplayPanel.repaint();
+	guiImageDisplayPanel.revalidate();
+	guiSettingList.repaint();
     }
     
-}//GEN-LAST:event_guiSettingListValueChanged
-
-private void guiNameFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiNameFieldFocusLost
-    mandelParameterList.getCurrentSetting().setName(guiNameField.getText());
-    mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiNameFieldFocusLost
-
-private void guiMaxIterFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxIterFieldFocusLost
-    mandelParameterList.getCurrentSetting().setMaxIterations(Integer.parseInt(guiMaxIterField.getText()));
-    mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiMaxIterFieldFocusLost
-
-private void guiMinRealFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMinRealFieldFocusLost
-   mandelParameterList.getCurrentSetting().setMinReal(Double.parseDouble(guiMinRealField.getText()));
-   mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiMinRealFieldFocusLost
-
-private void guiMaxRealFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxRealFieldFocusLost
-   mandelParameterList.getCurrentSetting().setMaxReal(Double.parseDouble(guiMaxRealField.getText()));
-   mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiMaxRealFieldFocusLost
-
-private void guiMinImagFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMinImagFieldFocusLost
-   mandelParameterList.getCurrentSetting().setMinImaginary(Double.parseDouble(guiMinImagField.getText()));
-   mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiMinImagFieldFocusLost
-
-private void guiMaxImagFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiMaxImagFieldFocusLost
-   mandelParameterList.getCurrentSetting().setMaxImaginary(Double.parseDouble(guiMaxImagField.getText()));
-   mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiMaxImagFieldFocusLost
-
-private void guiWidthFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiWidthFieldFocusLost
-   mandelParameterList.getCurrentSetting().setWidth(Integer.parseInt(guiWidthField.getText()));
-   mandelParameterList.notifyContentChanged();
-   
-}//GEN-LAST:event_guiWidthFieldFocusLost
-
-private void guiHeightFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_guiHeightFieldFocusLost
-   mandelParameterList.getCurrentSetting().setHeight(Integer.parseInt(guiHeightField.getText()));
-   mandelParameterList.notifyContentChanged();
-}//GEN-LAST:event_guiHeightFieldFocusLost
-
-private void guiSaveAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiSaveAllButtonActionPerformed
-    JFileChooser fc = new JFileChooser();
-    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    int returnVal = fc.showOpenDialog(this);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File dir = fc.getSelectedFile();
-        for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
-            BufferedImage img = o.getImage();
-            if (img != null) {
-                File file = new File(dir, o.getName() + ".png");
-                for (int i = 1; file.exists(); i++) {
-                    file = new File(dir, o.getName() + "_" + i + ".png");
-                }
-                try {
-                    ImageIO.write(img, "jpg", file);
-                    System.out.println("Saved image to file " + file.getName());
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(this, "Error writing out file: " + file.getName());
-                    break;
-                }
-            }
-        }
+    public void updateFromSetting(MandelSetting setting) {
+	if (setting != null) {
+	    guiNameField.setText(setting.getName());
+	    guiMinRealField.setText(Double.toString(setting.getMinReal()));
+	    guiMaxRealField.setText(Double.toString(setting.getMaxReal()));
+	    guiMinImagField.setText(Double.toString(setting.getMinImaginary()));
+	    guiMaxImagField.setText(Double.toString(setting.getMaxImaginary()));
+	    guiMaxIterField.setText(Integer.toString(setting.getMaxIterations()));
+	    guiWidthField.setText(Integer.toString(setting.getWidth()));
+	    guiHeightField.setText(Integer.toString(setting.getHeight()));
+	} else {
+	    guiNameField.setText("");
+	    guiMinRealField.setText("");
+	    guiMaxRealField.setText("");
+	    guiMinImagField.setText("");
+	    guiMaxImagField.setText("");
+	    guiMaxIterField.setText("");
+	    guiWidthField.setText("");
+	    guiHeightField.setText("");
+	}
     }
-}//GEN-LAST:event_guiSaveAllButtonActionPerformed
-
-private void guiComputeModeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiComputeModeComboActionPerformed
-    computeMode = MandelProcessor.ComputeMode.class.getEnumConstants()[guiComputeModeCombo.getSelectedIndex()];
-}//GEN-LAST:event_guiComputeModeComboActionPerformed
-
-public String getElapsedTimeString(long elapsedTime) {        
-    String format = String.format("%%0%dd", 2);    
-    String millisecs = String.format(format, elapsedTime % 1000);
-    elapsedTime /= 1000;
-    String seconds = String.format(format, elapsedTime % 60);  
-    String minutes = String.format(format, (elapsedTime % 3600) / 60);  
-    String hours = String.format(format, elapsedTime / 3600);  
-    String time =  hours + ":" + minutes + ":" + seconds + ":" + millisecs;  
-    return time;  
-}  
-
-public void initFromState() {
-    if (mandelParameterList.selectSetting(0)) {
-        guiSettingList.setSelectedIndex(0);
-        guiRenderButton.setEnabled(true);
-        guiComputeModeCombo.setEnabled(true);
-    }
-}
-
-public void refreshImage() {
-     if (mandelParameterList.getCurrentSetting() != null) {
-        guiImageDisplayPanel.setImage(mandelParameterList.getCurrentSetting().getImage());
-    } else {
-        guiImageDisplayPanel.setImage(null);
-    }
-    guiImageDisplayPanel.repaint();
-    guiImageDisplayPanel.revalidate();
-    guiSettingList.repaint();
-}
-
-public void updateFromSetting(MandelSetting setting) {
-    if (setting != null) {
-        guiNameField.setText(setting.getName());
-        guiMinRealField.setText(Double.toString(setting.getMinReal()));
-        guiMaxRealField.setText(Double.toString(setting.getMaxReal()));
-        guiMinImagField.setText(Double.toString(setting.getMinImaginary()));
-        guiMaxImagField.setText(Double.toString(setting.getMaxImaginary()));
-        guiMaxIterField.setText(Integer.toString(setting.getMaxIterations()));
-        guiWidthField.setText(Integer.toString(setting.getWidth()));
-        guiHeightField.setText(Integer.toString(setting.getHeight()));
-    } else {
-        guiNameField.setText("");
-        guiMinRealField.setText("");
-        guiMaxRealField.setText("");
-        guiMinImagField.setText("");
-        guiMaxImagField.setText("");
-        guiMaxIterField.setText("");
-        guiWidthField.setText("");
-        guiHeightField.setText("");
-    }
-}
-
+    
     /**
      * @param args the command line arguments
      */
@@ -638,7 +641,7 @@ public void updateFromSetting(MandelSetting setting) {
     private javax.swing.JComboBox guiComputeModeCombo;
     private javax.swing.JFormattedTextField guiHeightField;
     private javax.swing.JLabel guiHeightLabel;
-    private flinders.mandelbrot.ImagePanel guiImageDisplayPanel;
+    private ImagePanel guiImageDisplayPanel;
     private javax.swing.JFormattedTextField guiMaxImagField;
     private javax.swing.JLabel guiMaxImagLabel;
     private javax.swing.JFormattedTextField guiMaxIterField;
@@ -666,6 +669,10 @@ public void updateFromSetting(MandelSetting setting) {
     private javax.swing.JLabel guiTimeFormatLabel;
     private javax.swing.JFormattedTextField guiWidthField;
     private javax.swing.JLabel guiWidthLabel;
+    private javax.swing.JPanel guiProcessBarPanel;
+    private javax.swing.JLabel guiProcessBarLabel;
+    private javax.swing.JScrollPane guiProcessBarScrollPane;
+    private javax.swing.JPanel guiProcessBarScrollArea;
     // End of variables declaration//GEN-END:variables
 
     // backend variables

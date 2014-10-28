@@ -1,5 +1,3 @@
-package flinders.mandelbrot;
-
 import java.awt.image.BufferedImage;
 
 /**

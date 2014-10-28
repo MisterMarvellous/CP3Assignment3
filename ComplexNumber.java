@@ -1,5 +1,3 @@
-package flinders.mandelbrot;
-
 /**
  * A complex number.
  * @author Martin Luerssen
