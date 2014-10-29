@@ -57,6 +57,10 @@ public class MandelBatchGUI extends javax.swing.JFrame {
         guiRemoveSettingButton = new javax.swing.JButton();
         guiImageDisplayPanel = new ImagePanel();
 	guiProcessBarPanel = new javax.swing.JPanel();
+	guiProcessBarLabel = new javax.swing.JLabel();
+	guiProcessBarScrollPane = new javax.swing.JScrollPane();
+	guiProcessBarScrollArea = new javax.swing.JPanel();
+	processCount = 0;
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("MandelBatch");
@@ -375,7 +379,38 @@ public class MandelBatchGUI extends javax.swing.JFrame {
         guiImageDisplayPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         guiImageDisplayPanel.setFocusable(false);
 
-	
+	guiProcessBarLabel.setText("Processes");
+	guiProcessBarLabel.setFont(new java.awt.Font(guiProcessBarLabel.getFont().getFontName(), java.awt.Font.BOLD, guiProcessBarLabel.getFont().getSize()));
+	guiProcessBarScrollPane.setViewportView(guiProcessBarScrollArea);
+	java.awt.GridBagLayout scrollAreaLayout = new java.awt.GridBagLayout();
+	guiProcessBarScrollArea.setLayout(scrollAreaLayout);
+	java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
+	c.weightx = 1.0;
+	c.fill = java.awt.GridBagConstraints.HORIZONTAL;
+	c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+	/*
+	for (int i = 0; i < 5; i++) {
+	    c.gridy = i;
+	    guiProcessBarScrollArea.add(new MandelProcessListing("test number " + (i+1), 4), c);
+	}*/
+
+	c.gridy = 1000;
+	c.weighty = 1.0;
+	guiProcessBarScrollArea.add(javax.swing.Box.createVerticalGlue(), c);
+
+	java.awt.GridBagLayout processBarPanelLayout = new java.awt.GridBagLayout();
+	guiProcessBarPanel.setLayout(processBarPanelLayout);
+	c = new java.awt.GridBagConstraints();
+	guiProcessBarPanel.add(guiProcessBarLabel, c);
+	c.gridy = 1;
+	c.gridwidth = 2;
+	c.weighty = 1.0;
+	c.weightx = 1.0;
+	c.fill = java.awt.GridBagConstraints.BOTH;
+	guiProcessBarPanel.add(guiProcessBarScrollPane, c);
+
+	//guiProcessBarScrollArea.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.red));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -393,7 +428,8 @@ public class MandelBatchGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(guiRenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
 		.addContainerGap()
-		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		      .addGap(8, 8, 8)
+		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -405,9 +441,11 @@ public class MandelBatchGUI extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(guiParametersPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(guiRenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap()
-		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+		.addComponent(guiRenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+	    .addGroup(layout.createSequentialGroup()
+		.addGap(5, 5, 5)
+		.addComponent(guiProcessBarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -423,14 +461,16 @@ public class MandelBatchGUI extends javax.swing.JFrame {
     private void guiRenderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRenderButtonActionPerformed
 	long startTime = System.currentTimeMillis();
 	for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
-	    mandelProcessor.compute(o, computeMode);
-	    o.setImage(mandelProcessor.getLastImage());
+	    MandelProcessListing l = new MandelProcessListing(o.getName(), computeMode==MandelProcessor.ComputeMode.JAVA_SINGLE?1:4);
+	    java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
+	    c.gridy = processCount++;
+	    guiProcessBarScrollArea.add(l, c);
+	    mandelProcessor.compute(o, computeMode, l, this);
 	    long betweenTime = System.currentTimeMillis();
 	    guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
 	}
 	long endTime = System.currentTimeMillis();
 	guiTimeElapsedField.setText(getElapsedTimeString(endTime-startTime));
-	refreshImage();
     }//GEN-LAST:event_guiRenderButtonActionPerformed
     
     private void guiRemoveSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRemoveSettingButtonActionPerformed
@@ -673,6 +713,7 @@ public class MandelBatchGUI extends javax.swing.JFrame {
     private javax.swing.JLabel guiProcessBarLabel;
     private javax.swing.JScrollPane guiProcessBarScrollPane;
     private javax.swing.JPanel guiProcessBarScrollArea;
+    private int processCount;
     // End of variables declaration//GEN-END:variables
 
     // backend variables

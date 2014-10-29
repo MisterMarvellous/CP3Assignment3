@@ -1,0 +1,13 @@
+public class RenderTask extends javax.swing.SwingWorker<Void, Integer> {
+    private MandelSetting o;
+    private MandelProcessor.ComputeMode computeMode;
+    public RenderTask(MandelSetting o, MandelProcessor.ComputeMode computeMode) {
+	this.o = o;
+	this.computeMode = computeMode;
+    }
+    
+    protected Void doInBackground() {
+	mandelProcessor.compute(o, computeMode);
+	o.setImage(mandelProcessor.getLastImage());
+    }
+}
