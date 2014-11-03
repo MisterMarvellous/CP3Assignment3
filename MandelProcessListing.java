@@ -6,6 +6,7 @@ public class MandelProcessListing extends javax.swing.JPanel {
     private javax.swing.JButton cancelButton;
     private java.awt.GridBagLayout layout;
     private java.awt.GridBagConstraints c;
+    private boolean processing;
 
     public MandelProcessListing(String name, int threadsNo) {
 	processName = name;
@@ -42,13 +43,41 @@ public class MandelProcessListing extends javax.swing.JPanel {
 	c.fill = java.awt.GridBagConstraints.NONE;
 	c.anchor = java.awt.GridBagConstraints.LINE_END;
 	cancelButton.setText("Cancel");
+	java.awt.Dimension d = new java.awt.Dimension(70, 27);
+	cancelButton.setMinimumSize(d);
+	cancelButton.setMaximumSize(d);
+	cancelButton.setPreferredSize(d);
 	add(cancelButton, c);
 	
     }
 
     public void setBarProgress(int progress, int bar) {
 	if (bar < progressBars.length) {
+	    //System.out.println(processName + " at " + progress + "%");
 	    progressBars[bar].setValue(progress);
 	}
     }
+    
+    public void setProcessing() {
+	processing = true;
+	updateButton();
+    }
+
+    public void setIdle() {
+	processing = false;
+	updateButton();
+    }
+
+    private void updateButton() {
+	cancelButton.setText(processing?"Cancel":"OK");
+    }
+
+    public javax.swing.JButton getCancelButton() {
+	return cancelButton;
+    }
+
+    public boolean getProcessing() {
+	return processing;
+    }
+
 }

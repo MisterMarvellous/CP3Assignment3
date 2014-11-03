@@ -61,6 +61,7 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	guiProcessBarScrollPane = new javax.swing.JScrollPane();
 	guiProcessBarScrollArea = new javax.swing.JPanel();
 	processCount = 0;
+	processMap = new java.util.HashMap<String, MandelProcessListing>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("MandelBatch");
@@ -385,9 +386,6 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	java.awt.GridBagLayout scrollAreaLayout = new java.awt.GridBagLayout();
 	guiProcessBarScrollArea.setLayout(scrollAreaLayout);
 	java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
-	c.weightx = 1.0;
-	c.fill = java.awt.GridBagConstraints.HORIZONTAL;
-	c.insets = new java.awt.Insets(5, 5, 5, 5);
 
 	/*
 	for (int i = 0; i < 5; i++) {
@@ -461,11 +459,25 @@ public class MandelBatchGUI extends javax.swing.JFrame {
     private void guiRenderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRenderButtonActionPerformed
 	long startTime = System.currentTimeMillis();
 	for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
-	    MandelProcessListing l = new MandelProcessListing(o.getName(), computeMode==MandelProcessor.ComputeMode.JAVA_SINGLE?1:4);
-	    java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
-	    c.gridy = processCount++;
-	    guiProcessBarScrollArea.add(l, c);
-	    mandelProcessor.compute(o, computeMode, l, this);
+	    MandelProcessListing l = processMap.get(o.getName());
+	    if (l==null) {
+		l = new MandelProcessListing(o.getName(), computeMode==MandelProcessor.ComputeMode.JAVA_SINGLE?1:4);
+		processMap.put(o.getName(), l);
+		java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
+		c.weightx = 1.0;
+		c.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		c.insets = new java.awt.Insets(5, 5, 5, 5);
+		c.gridy = processCount++;
+		guiProcessBarScrollArea.add(l, c);
+	    }
+	    else {
+		l.setVisible(true);
+	    }
+	    repaint();
+	    validate();
+	    setVisible(true);
+	    MandelProcessor mp = new MandelProcessor();
+	    mp.compute(o, computeMode, l, this);
 	    long betweenTime = System.currentTimeMillis();
 	    guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
 	}
@@ -714,6 +726,7 @@ public class MandelBatchGUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane guiProcessBarScrollPane;
     private javax.swing.JPanel guiProcessBarScrollArea;
     private int processCount;
+    private java.util.HashMap<String, MandelProcessListing> processMap;
     // End of variables declaration//GEN-END:variables
 
     // backend variables

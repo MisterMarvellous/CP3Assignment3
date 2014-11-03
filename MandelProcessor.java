@@ -1,4 +1,5 @@
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 /**
  * Mandelbrot renderer.
@@ -8,11 +9,12 @@ public class MandelProcessor {
     public enum ComputeMode { JAVA_SINGLE, JAVA_MULTI };
     
     private BufferedImage image;
-    private int counter;
     private MandelProcessListing l;
     private MandelBatchGUI g;
         
-    public void compute(MandelSetting s, ComputeMode m, MandelProcessListing l, MandelBatchGUI g) {
+    public void compute(MandelSetting s, ComputeMode m, MandelProcessListing listing, MandelBatchGUI g) {
+	l = listing;
+	this.g = g;
         switch (m) {
             case JAVA_SINGLE:
                 compute_java_single(s);
@@ -21,18 +23,19 @@ public class MandelProcessor {
                 compute_java_multi(s);
                 break;           
         }
-	this.l = l;
-	this.g = g;
-	counter = 0;
     }
 
     private void compute_java_single(MandelSetting s) {
 
 	final MandelSetting sf = s;
 
-	javax.swing.SwingWorker<Void, Integer> renderWorker = new javax.swing.SwingWorker<Void, Integer>() { 
+	final javax.swing.SwingWorker<Void, Integer> renderWorker = new javax.swing.SwingWorker<Void, Integer>() { 
 	    
 	    protected Void doInBackground() {
+
+		l.setProcessing();
+
+		int counter = 0;
 
 		System.out.println("Rendering Mandelbrot set with: R in [" + sf.getMinReal() + "," + sf.getMaxReal()
 				   + "], I in [" + sf.getMinImaginary() + "," + sf.getMaxImaginary() 
@@ -60,29 +63,42 @@ public class MandelProcessor {
 			    rgb |= (int)(Math.sin(c*8*Math.PI+10) * 127) + 128;
 			    image.setRGB(x, y, rgb);
 			}
+			if (isCancelled()) { break; }
 			counter++;
-			System.out.println("Counter: " + counter);
-			publish((counter)/(sf.getHeight()+sf.getWidth()));
-			System.out.println("Got to show value");
+			publish((counter*100)/(sf.getHeight()*sf.getWidth()));
+			//System.out.println("Got to show value");
 		    }
+		    if (isCancelled()) { break; }
 		}
-		
-		System.out.println("Render complete (" + sf.getWidth() + "x" + sf.getHeight() + " pixels)");
-		sf.setImage(image);
+		if (isCancelled()) { System.out.println("Render cancelled at " + (counter*100)/(sf.getHeight()*sf.getWidth()) + "%"); }
+		else {
+		    System.out.println("Render complete (" + sf.getWidth() + "x" + sf.getHeight() + " pixels)");
+		    sf.setImage(image);
+		}
 		return null;
 	    }
 	    
-	    protected void process(Integer value) {
+	    protected void process(List<Integer> progress) {
+		int value = progress.get(progress.size()-1);
 		l.setBarProgress(value, 0);
 	    }
 
 	    protected void done() {
 		g.refreshImage();
+		l.setIdle();
 	    }
 	};
 
 	renderWorker.execute();	
         
+	l.getCancelButton().addActionListener(new java.awt.event.ActionListener() {
+	    public void actionPerformed(java.awt.event.ActionEvent e) {
+		if (l.getProcessing()) {
+		    renderWorker.cancel(false);
+		}
+		l.setVisible(false);
+	    }
+	});
     }
     
     private void compute_java_multi(MandelSetting s) {
