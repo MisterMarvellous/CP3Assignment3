@@ -11,7 +11,12 @@ public class MandelProcessor {
     private BufferedImage image;
     private MandelProcessListing l;
     private MandelBatchGUI g;
+    private long t;
         
+    public MandelProcessor(long beginTime) {
+	t = beginTime;
+    }
+
     public void compute(MandelSetting s, ComputeMode m, MandelProcessListing listing, MandelBatchGUI g) {
 	l = listing;
 	this.g = g;
@@ -84,6 +89,7 @@ public class MandelProcessor {
 	    }
 
 	    protected void done() {
+		g.updateWithTime(System.currentTimeMillis()-t);
 		g.refreshImage();
 		l.setIdle();
 	    }

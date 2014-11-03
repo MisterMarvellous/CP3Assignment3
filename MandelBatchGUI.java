@@ -476,13 +476,11 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	    repaint();
 	    validate();
 	    setVisible(true);
-	    MandelProcessor mp = new MandelProcessor();
+	    MandelProcessor mp = new MandelProcessor(startTime);
 	    mp.compute(o, computeMode, l, this);
 	    long betweenTime = System.currentTimeMillis();
 	    guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
 	}
-	long endTime = System.currentTimeMillis();
-	guiTimeElapsedField.setText(getElapsedTimeString(endTime-startTime));
     }//GEN-LAST:event_guiRenderButtonActionPerformed
     
     private void guiRemoveSettingButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guiRemoveSettingButtonActionPerformed
@@ -629,6 +627,10 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	guiImageDisplayPanel.revalidate();
 	guiSettingList.repaint();
     }
+
+    public void updateWithTime(long time) {
+	guiTimeElapsedField.setText(getElapsedTimeString(time));
+    }
     
     public void updateFromSetting(MandelSetting setting) {
 	if (setting != null) {
@@ -731,7 +733,7 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 
     // backend variables
     private MandelSettingList mandelParameterList = new MandelSettingList(this, "Assets/config.ser");
-    private MandelProcessor mandelProcessor = new MandelProcessor();
+    private MandelProcessor mandelProcessor;
     private MandelProcessor.ComputeMode computeMode = MandelProcessor.ComputeMode.JAVA_SINGLE;
     
 }
