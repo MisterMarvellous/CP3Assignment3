@@ -62,6 +62,8 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	guiProcessBarScrollArea = new javax.swing.JPanel();
 	processCount = 0;
 	processMap = new java.util.HashMap<String, MandelProcessListing>();
+	processors = java.lang.Runtime.getRuntime().availableProcessors();
+	threadPool = java.util.concurrent.Executors.newFixedThreadPool(processors);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("MandelBatch");
@@ -461,23 +463,29 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	for (MandelSetting o : guiSettingList.getSelectedValuesList()) {
 	    MandelProcessListing l = processMap.get(o.getName());
 	    if (l==null) {
-		l = new MandelProcessListing(o.getName(), computeMode==MandelProcessor.ComputeMode.JAVA_SINGLE?1:4);
-		processMap.put(o.getName(), l);
 		java.awt.GridBagConstraints c = new java.awt.GridBagConstraints();
 		c.weightx = 1.0;
 		c.fill = java.awt.GridBagConstraints.HORIZONTAL;
 		c.insets = new java.awt.Insets(5, 5, 5, 5);
 		c.gridy = processCount++;
+		l = new MandelProcessListing(o.getName(), computeMode, this, c);
+		processMap.put(o.getName(), l);
 		guiProcessBarScrollArea.add(l, c);
 	    }
 	    else {
+		if (l.getComputeMode()!=computeMode) {
+		    guiProcessBarScrollArea.remove(l);
+		    l = new MandelProcessListing(o.getName(), computeMode, this, l.getOuterGridBagConstraints());
+		    processMap.put(o.getName(), l);
+		    guiProcessBarScrollArea.add(l, l.getOuterGridBagConstraints());
+		}
 		l.setVisible(true);
 	    }
 	    repaint();
 	    validate();
 	    setVisible(true);
 	    MandelProcessor mp = new MandelProcessor(startTime);
-	    mp.compute(o, computeMode, l, this);
+	    mp.compute(o, computeMode, l, this, threadPool);
 	    long betweenTime = System.currentTimeMillis();
 	    guiTimeElapsedField.setText(getElapsedTimeString(betweenTime-startTime));
 	}
@@ -653,6 +661,10 @@ public class MandelBatchGUI extends javax.swing.JFrame {
 	    guiHeightField.setText("");
 	}
     }
+
+    public int getProcessors() {
+	return processors;
+    }
     
     /**
      * @param args the command line arguments
@@ -729,6 +741,8 @@ public class MandelBatchGUI extends javax.swing.JFrame {
     private javax.swing.JPanel guiProcessBarScrollArea;
     private int processCount;
     private java.util.HashMap<String, MandelProcessListing> processMap;
+    private int processors;
+    private java.util.concurrent.ExecutorService threadPool;
     // End of variables declaration//GEN-END:variables
 
     // backend variables

@@ -6,11 +6,15 @@ public class MandelProcessListing extends javax.swing.JPanel {
     private javax.swing.JButton cancelButton;
     private java.awt.GridBagLayout layout;
     private java.awt.GridBagConstraints c;
+    private java.awt.GridBagConstraints outerConstraints;
     private boolean processing;
+    private MandelProcessor.ComputeMode computeMode;
 
-    public MandelProcessListing(String name, int threadsNo) {
+    public MandelProcessListing(String name, MandelProcessor.ComputeMode computeMode, MandelBatchGUI g, java.awt.GridBagConstraints outerConstraints) {
+	this.outerConstraints = outerConstraints;
 	processName = name;
-	this.threadsNo = threadsNo;
+	this.computeMode = computeMode;
+	threadsNo = (this.computeMode==MandelProcessor.ComputeMode.JAVA_SINGLE?1:g.getProcessors());
 	processNameLabel = new javax.swing.JLabel();
 	progressBars = new javax.swing.JProgressBar[threadsNo];
 	cancelButton = new javax.swing.JButton();
@@ -78,6 +82,14 @@ public class MandelProcessListing extends javax.swing.JPanel {
 
     public boolean getProcessing() {
 	return processing;
+    }
+
+    public MandelProcessor.ComputeMode getComputeMode() {
+	return computeMode;
+    }
+
+    public java.awt.GridBagConstraints getOuterGridBagConstraints() {
+	return outerConstraints;
     }
 
 }
